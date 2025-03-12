@@ -261,7 +261,7 @@
             }
         }
 
-        // تحويل التاريخ الهجري إلى ميلادي (تقريب محسّن)
+        // تحويل التاريخ الهجري إلى ميلادي
         function hijriToGregorian(hijriYear, hijriMonth, hijriDay) {
             const jd = Math.floor((11 * hijriYear + 3) / 30) + 354 * hijriYear + 30 * hijriMonth - Math.floor((hijriMonth - 1) / 2) + hijriDay + 1948440 - 385;
             const date = new Date((jd - 2440588) * 86400000);
@@ -307,21 +307,21 @@
 
             for (let year = birthHijriYear; year <= currentHijriYear; year++) {
                 if (year >= takleefYear) {
-                    if (year > birthHijriYear || birthHijriMonth <= 9) ramadanCount++; // رمضان (الشهر 9)
-                    if (year > birthHijriYear || birthHijriMonth <= 10) eidFitrCount++; // عيد الفطر (الشهر 10)
-                    if (year > birthHijriYear || birthHijriMonth <= 12) eidAdhaCount++; // عيد الأضحى (الشهر 12)
+                    if (year > birthHijriYear || birthHijriMonth <= 9) ramadanCount++;
+                    if (year > birthHijriYear || birthHijriMonth <= 10) eidFitrCount++;
+                    if (year > birthHijriYear || birthHijriMonth <= 12) eidAdhaCount++;
                 }
             }
             return { ramadanCount, eidFitrCount, eidAdhaCount };
         }
 
-        // جلب بيانات الفرق من ويكيبيديا باستخدام allorigins
-        async function fetchTeamData(team) {
+        // جلب بيانات الفرق وتحليل البطولات
+        async function fetchTeamData(team, birthDateGreg) {
             const teamUrls = {
-                "الهلال": "https://ar.wikipedia.org/wiki/%D9%86%D8%A7%D8%AF%D9%8A_%D8%A7%D9%84%D9%87%D9%84%D8%A7%D9%84_%D8%A7%D9%84%D8%B3%D8%B9%D9%88%D8%AF%D9%8A",
-                "النصر": "https://ar.wikipedia.org/wiki/%D9%86%D8%A7%D8%AF%D9%8A_%D8%A7%D9%84%D9%86%D8%B5%D8%B1_%D8%A7%D9%84%D8%B3%D8%B9%D9%88%D8%AF%D9%8A",
-                "الاتحاد": "https://ar.wikipedia.org/wiki/%D9%86%D8%A7%D8%AF%D9%8A_%D8%A7%D9%84%D8%A7%D8%AA%D8%AD%D8%A7%D8%AF_%D8%A7%D9%84%D8%B3%D8%B9%D9%88%D8%AF%D9%8A",
-                "الأهلي": "https://ar.wikipedia.org/wiki/%D9%86%D8%A7%D8%AF%D9%8A_%D8%A7%D9%84%D8%A3%D9%87%D9%84%D9%8A_%D8%A7%D9%84%D8%B3%D8%B9%D9%88%D8%AF%D9%8A"
+                "الهلال": "https://ar.wikipedia.org/wiki/%D9%82%D8%A7%D8%A6%D9%85%D8%A9_%D8%A8%D8%B7%D9%88%D9%84%D8%A7%D8%AA_%D9%86%D8%A7%D8%AF%D9%8A_%D8%A7%D9%84%D9%87%D9%84%D8%A7%D9%84_%D8%A7%D9%84%D8%B3%D8%B9%D9%88%D8%AF%D9%8A",
+                "النصر": "https://ar.wikipedia.org/wiki/%D9%82%D8%A7%D8%A6%D9%85%D8%A9_%D8%A8%D8%B7%D9%88%D9%84%D8%A7%D8%AA_%D9%86%D8%A7%D8%AF%D9%8A_%D8%A7%D9%84%D9%86%D8%B5%D8%B1_%D8%A7%D9%84%D8%B3%D8%B9%D9%88%D8%AF%D9%8A",
+                "الاتحاد": "https://ar.wikipedia.org/wiki/%D9%82%D8%A7%D8%A6%D9%85%D8%A9_%D8%A8%D8%B7%D9%88%D9%84%D8%A7%D8%AA_%D9%86%D8%A7%D8%AF%D9%8A_%D8%A7%D9%84%D8%A7%D8%AA%D8%AD%D8%A7%D8%AF_%D8%A7%D9%84%D8%B3%D8%B9%D9%88%D8%AF%D9%8A",
+                "الأهلي": "https://ar.wikipedia.org/wiki/%D9%82%D8%A7%D8%A6%D9%85%D8%A9_%D8%A8%D8%B7%D9%88%D9%84%D8%A7%D8%AA_%D9%86%D8%A7%D8%AF%D9%8A_%D8%A7%D9%84%D8%A3%D9%87%D9%84%D9%8A_%D8%A7%D9%84%D8%B3%D8%B9%D9%88%D8%AF%D9%8A"
             };
             const url = `https://api.allorigins.win/raw?url=${encodeURIComponent(teamUrls[team])}`;
             try {
@@ -329,17 +329,30 @@
                 const html = await response.text();
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(html, "text/html");
-                const titlesText = doc.querySelector(".infobox")?.innerText || "غير متوفر";
-                const totalTitlesMatch = titlesText.match(/البطولات.*?(\d+)/i);
-                const totalTitles = totalTitlesMatch ? parseInt(totalTitlesMatch[1]) : 0;
-                return { totalTitles, titlesAfterBirth: Math.floor(totalTitles * 0.3) }; // تقدير تقريبي للبطولات بعد الميلاد
+                const titleElements = doc.querySelectorAll("table.wikitable td");
+                let totalTitles = 0;
+                let titlesAfterBirth = 0;
+
+                titleElements.forEach(element => {
+                    const text = element.textContent.trim();
+                    const yearMatch = text.match(/\d{4}/);
+                    if (yearMatch) {
+                        const year = parseInt(yearMatch[0]);
+                        totalTitles++;
+                        if (year >= birthDateGreg.getFullYear()) {
+                            titlesAfterBirth++;
+                        }
+                    }
+                });
+
+                return { totalTitles: totalTitles || 0, titlesAfterBirth: titlesAfterBirth || 0 };
             } catch (error) {
                 console.error("Error fetching team data:", error);
                 return { totalTitles: 0, titlesAfterBirth: 0 };
             }
         }
 
-        // جلب الأحداث التاريخية من ويكيبيديا
+        // جلب أهم 3 أحداث تاريخية
         async function fetchHistoricalEvents(day, month) {
             const url = `https://api.allorigins.win/raw?url=${encodeURIComponent(`https://ar.wikipedia.org/wiki/${month}_${day}`)}`;
             try {
@@ -348,7 +361,7 @@
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(html, "text/html");
                 const eventsList = doc.querySelectorAll("#mw-content-text ul li");
-                const events = Array.from(eventsList).slice(0, 5).map(li => li.textContent.trim());
+                const events = Array.from(eventsList).slice(0, 3).map(li => li.textContent.trim());
                 return events.length > 0 ? events : ["لا توجد أحداث متاحة لهذا اليوم"];
             } catch (error) {
                 console.error("Error fetching events:", error);
@@ -386,13 +399,13 @@
             document.getElementById("teamInitial").textContent = team[0];
             document.getElementById("teamName").textContent = team;
 
-            const teamData = await fetchTeamData(team);
+            const teamData = await fetchTeamData(team, birthDateGreg);
             document.getElementById("totalTitles").textContent = teamData.totalTitles;
             document.getElementById("titlesAfterBirth").textContent = teamData.titlesAfterBirth;
 
             const events = await fetchHistoricalEvents(birthDateGreg.getDate(), birthDateGreg.getMonth() + 1);
             document.getElementById("events").innerHTML = `
-                <h4 class="text-lg font-bold mb-3">أحداث في يوم ${birthDateGreg.getDate()}/${birthDateGreg.getMonth() + 1}</h4>
+                <h4 class="text-lg font-bold mb-3">أهم 3 أحداث في يوم ${birthDateGreg.getDate()}/${birthDateGreg.getMonth() + 1}</h4>
                 <ul class="space-y-1">${events.map(event => `<li>${event}</li>`).join("")}</ul>
             `;
 
@@ -440,10 +453,33 @@
 
             document.getElementById("savePdfBtn").addEventListener("click", () => {
                 const { jsPDF } = window.jspdf;
-                const doc = new jsPDF();
-                html2canvas(document.getElementById("dashboard")).then(canvas => {
+                const doc = new jsPDF('p', 'mm', 'a4');
+                const dashboard = document.getElementById("dashboard");
+                const width = doc.internal.pageSize.getWidth();
+                const height = doc.internal.pageSize.getHeight();
+
+                html2canvas(dashboard, {
+                    scale: 2, // تحسين الجودة
+                    width: dashboard.scrollWidth,
+                    height: dashboard.scrollHeight,
+                    windowWidth: document.body.scrollWidth,
+                    windowHeight: document.body.scrollHeight
+                }).then(canvas => {
                     const imgData = canvas.toDataURL('image/png');
-                    doc.addImage(imgData, 'PNG', 10, 10, 190, 0);
+                    const imgHeight = (canvas.height * width) / canvas.width;
+                    let heightLeft = imgHeight;
+                    let position = 0;
+
+                    doc.addImage(imgData, 'PNG', 0, position, width, imgHeight);
+                    heightLeft -= height;
+
+                    while (heightLeft > 0) {
+                        position = heightLeft - imgHeight;
+                        doc.addPage();
+                        doc.addImage(imgData, 'PNG', 0, position, width, imgHeight);
+                        heightLeft -= height;
+                    }
+
                     doc.save("لوحة_المعلومات.pdf");
                 });
             });
