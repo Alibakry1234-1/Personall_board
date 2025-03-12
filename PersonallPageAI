@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة معلوماتك الشخصية</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body class="bg-gray-50 p-4">
+
+    <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-md p-6">
+        <h1 class="text-3xl font-bold text-center text-primary">لوحة معلوماتك الشخصية</h1>
+
+        <div class="mt-6">
+            <label for="hijriDate" class="block text-lg font-medium">تاريخ ميلادك الهجري</label>
+            <input type="date" id="hijriDate" class="w-full p-2 border rounded">
+        </div>
+
+        <button id="calculateBtn" class="mt-4 w-full bg-blue-600 text-white py-2 rounded">حساب الإحصائيات</button>
+
+        <div id="results" class="mt-6 hidden">
+            <h2 class="text-2xl font-bold">إحصائيات العمر</h2>
+            <p id="gregorianAge" class="mt-2"></p>
+            <p id="hijriAge"></p>
+
+            <h2 class="text-2xl font-bold mt-4">المناسبات الإسلامية</h2>
+            <p id="ramadanCount"></p>
+            <p id="eidFitrCount"></p>
+            <p id="eidAdhaCount"></p>
+
+            <button id="savePdfBtn" class="mt-4 w-full bg-green-600 text-white py-2 rounded">حفظ كملف PDF</button>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById("calculateBtn").addEventListener("click", function() {
+            const hijriDateInput = document.getElementById("hijriDate").value;
+            if (!hijriDateInput) {
+                alert("يرجى إدخال تاريخ الميلاد الهجري");
+                return;
+            }
+
+            const hijriDate = new Date(hijriDateInput);
+            const gregorianDate = new Date(hijriDate.getFullYear() - 579, hijriDate.getMonth(), hijriDate.getDate());
+            const today = new Date();
+
+            const gregorianAge = calculateAge(gregorianDate, today);
+            const hijriAge = calculateAge(hijriDate, today);
+
+            document.getElementById("gregorianAge").innerHTML = `العمر بالميلادي: ${gregorianAge.years} سنة و ${gregorianAge.months} شهر و ${gregorianAge.days} يوم`;
+            document.getElementById("hijriAge").innerHTML = `العمر بالهجري: ${hijriAge.years} سنة و ${hijriAge.months} شهر و ${hijriAge.days} يوم`;
+
+            // حساب عدد الرمضانات والأعياد بعد سن التكليف
+            const hijriAgeAtTaklif = hijriAge.years - 15;
+            const ramadanCount = hijriAgeAtTaklif > 0 ? hijriAgeAtTaklif : 0;
+            const eidFitrCount = ramadanCount;
+            const eidAdhaCount = ramadanCount;
+
+            document.getElementById("ramadanCount").innerHTML = `عدد رمضانات منذ التكليف: ${ramadanCount}`;
+            document.getElementById("eidFitrCount").innerHTML = `عدد أعياد الفطر منذ التكليف: ${eidFitrCount}`;
+            document.getElementById("eidAdhaCount").innerHTML = `عدد أعياد الأضحى منذ التكليف: ${eidAdhaCount}`;
+
+            document.getElementById("results").classList.remove("hidden");
+        });
+
+        function calculateAge(birthDate, today) {
+            let years = today.getFullYear() - birthDate.getFullYear();
+            let months = today.getMonth() - birthDate.getMonth();
+            let days = today.getDate() - birthDate.getDate();
+
+            if (days < 0) {
+                months -= 1;
+                days += 30;
+            }
+
+            if (months < 0) {
+                years -= 1;
+                months += 12;
+            }
+
+            return { years, months, days };
+        }
+
+        document.getElementById("savePdfBtn").addEventListener("click", function() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            doc.text("لوحة معلوماتك الشخصية", 10, 10);
+            doc.text(document.getElementById("gregorianAge").innerText, 10, 20);
+            doc.text(document.getElementById("hijriAge").innerText, 10, 30);
+            doc.text(document.getElementById("ramadanCount").innerText, 10, 40);
+            doc.text(document.getElementById("eidFitrCount").innerText, 10, 50);
+            doc.text(document.getElementById("eidAdhaCount").innerText, 10, 60);
+
+            doc.save("لوحة_المعلومات.pdf");
+        });
+    </script>
+
+</body>
+</html>
