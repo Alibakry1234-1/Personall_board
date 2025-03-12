@@ -6,92 +6,274 @@
     <title>لوحة معلوماتك الشخصية</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#5D5CDE',
-                        secondary: '#6C63FF',
-                        accent: '#FF6B6B',
-                    },
-                    fontFamily: {
-                        tajawal: ['Tajawal', 'sans-serif']
-                    }
-                }
-            }
-        };
-    </script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap');
-        
+
         body {
             font-family: 'Tajawal', sans-serif;
             transition: all 0.3s ease;
         }
 
-        /* Animations */
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .animate-fadeIn {
-            animation: fadeIn 0.5s ease forwards;
+        .animate-fadeIn { animation: fadeIn 0.5s ease forwards; }
+        .card-item { animation: fadeIn 0.5s ease forwards; opacity: 0; }
+        .card-item:nth-child(1) { animation-delay: 0.1s; }
+        .card-item:nth-child(2) { animation-delay: 0.2s; }
+        .card-item:nth-child(3) { animation-delay: 0.3s; }
+
+        @keyframes spinner { to { transform: rotate(360deg); } }
+        .spinner:before {
+            content: ''; box-sizing: border-box; position: absolute; top: 50%; left: 50%;
+            width: 30px; height: 30px; margin-top: -15px; margin-left: -15px;
+            border-radius: 50%; border: 3px solid #ccc; border-top-color: #5D5CDE;
+            animation: spinner .6s linear infinite;
         }
 
-        /* Custom scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.05); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: rgba(93, 92, 222, 0.5); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(93, 92, 222, 0.7); }
 
-        ::-webkit-scrollbar-thumb {
-            background: rgba(93, 92, 222, 0.5);
-            border-radius: 10px;
+        .stat-card {
+            transition: all 0.3s ease; position: relative; overflow: hidden; z-index: 1;
         }
+        .stat-card::before {
+            content: ''; position: absolute; top: -10px; right: -10px;
+            width: 40px; height: 40px; border-radius: 50%; background-color: rgba(93, 92, 222, 0.2); z-index: -1;
+        }
+        .stat-card:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1); }
     </style>
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 p-4 font-tajawal">
-
     <div class="max-w-4xl mx-auto bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 transition-all duration-300">
-        <h1 class="text-3xl font-bold text-center bg-gradient-to-l from-primary to-secondary text-transparent bg-clip-text">لوحة معلوماتك الشخصية</h1>
-        <p class="text-center text-gray-500 dark:text-gray-400 mt-2">إحصائيات وبيانات مخصصة على مدار حياتك</p>
-
-        <div id="formContainer" class="mt-6">
-            <label class="block font-medium text-lg">تاريخ ميلادك الهجري</label>
-            <div class="flex gap-2 mt-2">
-                <select id="hijriDay" class="flex-1 p-2 border rounded-lg"></select>
-                <select id="hijriMonth" class="flex-1 p-2 border rounded-lg">
-                    <option value="1">محرم</option>
-                    <option value="2">صفر</option>
-                    <option value="3">ربيع الأول</option>
-                    <option value="4">ربيع الآخر</option>
-                    <option value="5">جمادى الأولى</option>
-                    <option value="6">جمادى الآخرة</option>
-                    <option value="7">رجب</option>
-                    <option value="8">شعبان</option>
-                    <option value="9">رمضان</option>
-                    <option value="10">شوال</option>
-                    <option value="11">ذو القعدة</option>
-                    <option value="12">ذو الحجة</option>
-                </select>
-                <select id="hijriYear" class="flex-1 p-2 border rounded-lg"></select>
+        <div class="flex items-center justify-center mb-6">
+            <div class="animate-fadeIn">
+                <h1 class="text-3xl md:text-4xl font-bold text-center bg-gradient-to-l from-primary to-secondary inline-block text-transparent bg-clip-text">لوحة معلوماتك الشخصية</h1>
+                <p class="text-center text-gray-500 dark:text-gray-400 mt-2">إحصائيات وبيانات مخصصة على مدار حياتك</p>
             </div>
-
-            <button id="generateBtn" class="w-full bg-primary text-white p-3 rounded-lg mt-4">إنشاء لوحة المعلومات</button>
         </div>
 
-        <div id="infoContainer" class="hidden mt-6">
-            <h2 class="text-xl font-bold mb-2">أحداث تاريخية يوم ميلادك</h2>
-            <ul id="historicalEvents" class="list-disc pl-6"></ul>
-            <button id="savePdfBtn" class="w-full bg-secondary text-white p-3 rounded-lg mt-4">حفظ كملف PDF</button>
+        <div id="errorMessage" class="hidden mb-6 p-3 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-200 rounded-lg text-center"></div>
+
+        <div id="formContainer" class="max-w-2xl mx-auto space-y-6 bg-gray-50 dark:bg-gray-700 p-6 rounded-xl shadow-sm">
+            <div>
+                <label for="name" class="block mb-2 font-medium text-lg">اسمك</label>
+                <input type="text" id="name" placeholder="أدخل اسمك الكامل" 
+                    class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-primary focus:border-primary" required>
+            </div>
+            
+            <div>
+                <label for="hijriDate" class="block mb-2 font-medium text-lg">تاريخ ميلادك الهجري</label>
+                <div class="flex flex-wrap md:flex-nowrap gap-2">
+                    <select id="hijriDay" class="flex-1 p-3 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-primary focus:border-primary" required>
+                        <option value="">اليوم</option>
+                    </select>
+                    <select id="hijriMonth" class="flex-1 p-3 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-primary focus:border-primary" required>
+                        <option value="">الشهر</option>
+                        <option value="1">محرّم</option>
+                        <option value="2">صفر</option>
+                        <option value="3">ربيع الأول</option>
+                        <option value="4">ربيع الثاني</option>
+                        <option value="5">جمادى الأولى</option>
+                        <option value="6">جمادى الآخرة</option>
+                        <option value="7">رجب</option>
+                        <option value="8">شعبان</option>
+                        <option value="9">رمضان</option>
+                        <option value="10">شوال</option>
+                        <option value="11">ذو القعدة</option>
+                        <option value="12">ذو الحجة</option>
+                    </select>
+                    <select id="hijriYear" class="flex-1 p-3 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-primary focus:border-primary" required>
+                        <option value="">السنة</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div>
+                <label for="team" class="block mb-2 font-medium text-lg">فريقك السعودي المفضل</label>
+                <select id="team" 
+                    class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-primary focus:border-primary" required>
+                    <option value="">اختر فريقك المفضل</option>
+                    <option value="الهلال">الهلال</option>
+                    <option value="النصر">النصر</option>
+                    <option value="الاتحاد">الاتحاد</option>
+                    <option value="الأهلي">الأهلي</option>
+                </select>
+            </div>
+            
+            <button id="saveBtn" 
+                class="w-full bg-gradient-to-l from-primary to-secondary hover:opacity-90 text-white font-medium py-3 px-4 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-1">
+                إنشاء لوحة المعلومات
+            </button>
         </div>
+
+        <div id="infoContainer" class="hidden">
+            <div id="loadingState" class="relative h-40">
+                <div class="spinner"></div>
+            </div>
+            
+            <div id="dashboard" class="hidden">
+                <div id="userHeader" class="flex flex-col md:flex-row items-center justify-between mb-8 bg-gray-50 dark:bg-gray-700 rounded-xl p-6 shadow-sm">
+                    <div class="flex items-center mb-4 md:mb-0">
+                        <div class="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white text-2xl font-bold mr-4">
+                            <span id="userInitials"></span>
+                        </div>
+                        <div>
+                            <h2 id="userName" class="text-2xl font-bold mb-1"></h2>
+                            <p id="userBirthDate" class="text-gray-600 dark:text-gray-300"></p>
+                        </div>
+                    </div>
+                    <div id="userTeamBadge" class="flex flex-col items-center">
+                        <div id="teamLogo" class="w-12 h-12 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center mb-2">
+                            <span id="teamInitial" class="text-xl font-bold"></span>
+                        </div>
+                        <p id="teamName" class="font-bold"></p>
+                    </div>
+                </div>
+                
+                <h3 class="text-xl font-bold mb-4 flex items-center">
+                    <span class="w-7 h-7 rounded-full bg-primary flex items-center justify-center text-white text-sm ml-2">1</span>
+                    إحصائيات عمرك
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div class="stat-card card-item bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-700 dark:to-gray-800 p-4 rounded-xl shadow-sm">
+                        <h4 class="text-primary dark:text-blue-300 font-bold mb-3">عمرك بالميلادي</h4>
+                        <div class="flex items-end">
+                            <span id="gregorianAge" class="text-3xl font-bold"></span>
+                            <span class="text-gray-600 dark:text-gray-400 mr-1 mb-1">سنة</span>
+                        </div>
+                        <div class="text-sm text-gray-600 dark:text-gray-400">
+                            <span id="gregorianMonths"></span> شهر و <span id="gregorianDays"></span> يوم
+                        </div>
+                    </div>
+                    <div class="stat-card card-item bg-gradient-to-br from-green-50 to-teal-50 dark:from-gray-700 dark:to-gray-800 p-4 rounded-xl shadow-sm">
+                        <h4 class="text-green-600 dark:text-green-300 font-bold mb-3">عمرك بالهجري</h4>
+                        <div class="flex items-end">
+                            <span id="hijriAge" class="text-3xl font-bold"></span>
+                            <span class="text-gray-600 dark:text-gray-400 mr-1 mb-1">سنة</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <h3 class="text-xl font-bold mb-4 flex items-center">
+                    <span class="w-7 h-7 rounded-full bg-primary flex items-center justify-center text-white text-sm ml-2">2</span>
+                    المناسبات الإسلامية في حياتك
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div class="stat-card card-item bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-gray-700 dark:to-gray-800 p-4 rounded-xl shadow-sm">
+                        <h4 class="text-amber-600 dark:text-amber-300 font-bold mb-3">شهر رمضان</h4>
+                        <div class="flex items-end">
+                            <span id="ramadanCount" class="text-3xl font-bold"></span>
+                            <span class="text-gray-600 dark:text-gray-400 mr-1 mb-1">شهر</span>
+                        </div>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">(منذ سن التكليف)</p>
+                    </div>
+                    <div class="stat-card card-item bg-gradient-to-br from-emerald-50 to-green-50 dark:from-gray-700 dark:to-gray-800 p-4 rounded-xl shadow-sm">
+                        <h4 class="text-emerald-600 dark:text-emerald-300 font-bold mb-3">عيد الفطر</h4>
+                        <div class="flex items-end">
+                            <span id="eidFitrCount" class="text-3xl font-bold"></span>
+                            <span class="text-gray-600 dark:text-gray-400 mr-1 mb-1">عيد</span>
+                        </div>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">(منذ سن التكليف)</p>
+                    </div>
+                    <div class="stat-card card-item bg-gradient-to-br from-red-50 to-rose-50 dark:from-gray-700 dark:to-gray-800 p-4 rounded-xl shadow-sm">
+                        <h4 class="text-red-600 dark:text-red-300 font-bold mb-3">عيد الأضحى</h4>
+                        <div class="flex items-end">
+                            <span id="eidAdhaCount" class="text-3xl font-bold"></span>
+                            <span class="text-gray-600 dark:text-gray-400 mr-1 mb-1">عيد</span>
+                        </div>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">(منذ سن التكليف)</p>
+                    </div>
+                </div>
+                
+                <h3 class="text-xl font-bold mb-4 flex items-center">
+                    <span class="w-7 h-7 rounded-full bg-primary flex items-center justify-center text-white text-sm ml-2">3</span>
+                    بطولات فريقك المفضل
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div class="stat-card card-item bg-gradient-to-br from-sky-50 to-blue-50 dark:from-gray-700 dark:to-gray-800 p-4 rounded-xl shadow-sm">
+                        <h4 class="text-sky-600 dark:text-sky-300 font-bold mb-3">البطولات الإجمالية</h4>
+                        <div class="flex items-end mb-2">
+                            <span id="totalTitles" class="text-3xl font-bold"></span>
+                            <span class="text-gray-600 dark:text-gray-400 mr-1 mb-1">بطولة</span>
+                        </div>
+                    </div>
+                    <div class="stat-card card-item bg-gradient-to-br from-indigo-50 to-violet-50 dark:from-gray-700 dark:to-gray-800 p-4 rounded-xl shadow-sm">
+                        <h4 class="text-indigo-600 dark:text-indigo-300 font-bold mb-3">البطولات في حياتك</h4>
+                        <div class="flex items-end mb-2">
+                            <span id="titlesAfterBirth" class="text-3xl font-bold"></span>
+                            <span class="text-gray-600 dark:text-gray-400 mr-1 mb-1">بطولة</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <h3 class="text-xl font-bold mb-4 flex items-center">
+                    <span class="w-7 h-7 rounded-full bg-primary flex items-center justify-center text-white text-sm ml-2">4</span>
+                    أحداث تاريخية في يوم ميلادك
+                </h3>
+                <div id="events" class="card-item bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 p-4 rounded-xl shadow-sm mb-6"></div>
+                
+                <div class="flex flex-wrap justify-center gap-3 mt-6">
+                    <button id="resetBtn" class="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-300 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-1" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" />
+                        </svg>
+                        إعادة تعيين
+                    </button>
+                    <button id="darkModeBtn" class="bg-gray-700 dark:bg-gray-300 text-white dark:text-gray-800 font-medium py-2 px-4 rounded-lg transition-colors duration-300 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-1" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
+                        </svg>
+                        تغيير الوضع
+                    </button>
+                    <button id="savePdfBtn" class="bg-primary hover:bg-opacity-90 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-300 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-1" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4 5a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V7a2 2 0 00-2-2h-1.586a1 1 0 01-.707-.293l-1.121-1.121A2 2 0 0011.172 3H8.828a2 2 0 00-1.414.586L6.293 4.707A1 1 0 015.586 5H4zm6 9a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" />
+                        </svg>
+                        حفظ كملف PDF
+                    </button>
+                </div>
+                <div id="pdfSaveInstructions" class="hidden mt-4 p-4 bg-blue-50 dark:bg-blue-900 text-blue-800 dark:text-blue-100 rounded-lg">
+                    <div class="flex items-start">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 ml-2 mt-1 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <div>
+                            <p class="font-medium">لحفظ اللوحة كملف PDF:</p>
+                            <ol class="list-decimal list-inside mt-2 text-sm space-y-1">
+                                <li>انقر على زر "حفظ كملف PDF"</li>
+                                <li>اختر مكان الحفظ واسم الملف</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="mt-8 pt-4 border-t border-gray-200 dark:border-gray-700 text-center text-gray-500 dark:text-gray-400 text-sm">
+            <p>جميع الحقوق محفوظة &copy; <span id="currentYear"></span></p>
+            <p class="mt-1">تم التطوير بواسطة <span class="font-bold text-primary">علي عبدالله بكري</span></p>
+        </footer>
     </div>
 
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
+        let userData = null;
+
+        function initDarkMode() {
+            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                document.documentElement.classList.add('dark');
+            }
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+                document.documentElement.classList.toggle('dark', event.matches);
+            });
+        }
+
+        function populateDateSelects() {
             const hijriDaySelect = document.getElementById("hijriDay");
             const hijriYearSelect = document.getElementById("hijriYear");
 
@@ -102,62 +284,187 @@
                 hijriDaySelect.appendChild(option);
             }
 
-            const currentYear = new Date().getFullYear();
-            const startYear = currentYear - 80; // آخر 80 سنة ديناميكيًا
-            for (let i = startYear; i <= currentYear; i++) {
+            const today = new Date();
+            const currentYear = today.getFullYear();
+            const currentHijriYear = Math.floor((currentYear - 622) * (33 / 32));
+            const startHijriYear = currentHijriYear - 80;
+
+            for (let i = currentHijriYear; i >= startHijriYear; i--) {
                 const option = document.createElement("option");
                 option.value = i;
                 option.textContent = i;
                 hijriYearSelect.appendChild(option);
             }
+        }
 
-            document.getElementById("generateBtn").addEventListener("click", async function () {
-                const hijriDay = hijriDaySelect.value;
+        function hijriToGregorian(hijriYear, hijriMonth, hijriDay) {
+            // تقريب بسيط للتحويل (يمكن تحسينه باستخدام مكتبة مثل hijri-converter)
+            const gregYear = Math.floor(hijriYear + (hijriYear * 0.03));
+            const gregMonth = hijriMonth - 1;
+            const gregDay = hijriDay;
+            return new Date(gregYear, gregMonth, gregDay);
+        }
+
+        function calculateHijriAge(birthHijriDate, todayHijriDate) {
+            const years = todayHijriDate.year - birthHijriDate.year;
+            const months = todayHijriDate.month - birthHijriDate.month;
+            const days = todayHijriDate.day - birthHijriDate.day;
+
+            let totalMonths = years * 12 + months;
+            if (days < 0) totalMonths -= 1;
+            return {
+                years: Math.floor(totalMonths / 12),
+                months: totalMonths % 12,
+                days: days < 0 ? 30 + days : days
+            };
+        }
+
+        function countIslamicEvents(birthHijriDate, todayHijriDate) {
+            let ramadanCount = 0, eidFitrCount = 0, eidAdhaCount = 0;
+            const totalMonths = (todayHijriDate.year - birthHijriDate.year) * 12 + (todayHijriDate.month - birthHijriDate.month);
+            const takleefAge = 10 * 12; // 10 سنوات هجرية = 120 شهرًا
+
+            for (let month = 0; month <= totalMonths; month++) {
+                const currentYear = Math.floor((birthHijriDate.year * 12 + birthHijriDate.month + month) / 12);
+                const currentMonth = (birthHijriDate.month + month - 1) % 12 + 1;
+                if (currentMonth === 9 && month >= takleefAge) ramadanCount++; // رمضان (الشهر 9)
+                if (currentMonth === 10 && month >= takleefAge) eidFitrCount++; // عيد الفطر (الشهر 10)
+                if (currentMonth === 12 && month >= takleefAge) eidAdhaCount++; // عيد الأضحى (الشهر 12)
+            }
+            return { ramadanCount, eidFitrCount, eidAdhaCount };
+        }
+
+        async function fetchDataFromGitHub(url) {
+            try {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error("Failed to fetch data");
+                return await response.json();
+            } catch (error) {
+                console.error("Error fetching data:", error);
+                return [];
+            }
+        }
+
+        async function displayUserInfo() {
+            if (!userData) return;
+
+            document.getElementById("formContainer").classList.add("hidden");
+            document.getElementById("infoContainer").classList.remove("hidden");
+            document.getElementById("loadingState").classList.remove("hidden");
+            document.getElementById("dashboard").classList.add("hidden");
+
+            const { name, hijriDate, team } = userData;
+            const [hijriDay, hijriMonth, hijriYear] = hijriDate.split('-').map(Number);
+            const birthDateGreg = hijriToGregorian(hijriYear, hijriMonth, hijriDay);
+            const today = new Date();
+            const ageInMilliseconds = today - birthDateGreg;
+            const ageInDays = Math.floor(ageInMilliseconds / (1000 * 60 * 60 * 24));
+            const ageInYears = Math.floor(ageInDays / 365);
+            const ageInMonths = Math.floor((ageInDays % 365) / 30);
+            const remainingDays = ageInDays % 30;
+
+            // تقدير التاريخ الهجري الحالي (تقريبي)
+            const currentHijriYear = Math.floor((today.getFullYear() - 622) * (33 / 32));
+            const currentHijriMonth = Math.floor((today.getMonth() + 1) * (12 / 12));
+            const currentHijriDay = today.getDate();
+            const todayHijriDate = { year: currentHijriYear, month: currentHijriMonth, day: currentHijriDay };
+            const birthHijriDate = { year: hijriYear, month: hijriMonth, day: hijriDay };
+            const hijriAge = calculateHijriAge(birthHijriDate, todayHijriDate);
+            const islamicEvents = countIslamicEvents(birthHijriDate, todayHijriDate);
+
+            // تحديث البيانات
+            document.getElementById("userInitials").textContent = name.split(' ').map(n => n[0]).join('').substring(0, 2);
+            document.getElementById("userName").textContent = name;
+            document.getElementById("userBirthDate").textContent = `تاريخ الميلاد الهجري: ${hijriDay}/${hijriMonth}/${hijriYear}`;
+            document.getElementById("gregorianAge").textContent = ageInYears;
+            document.getElementById("gregorianMonths").textContent = ageInMonths;
+            document.getElementById("gregorianDays").textContent = remainingDays;
+            document.getElementById("hijriAge").textContent = hijriAge.years;
+            document.getElementById("ramadanCount").textContent = islamicEvents.ramadanCount;
+            document.getElementById("eidFitrCount").textContent = islamicEvents.eidFitrCount;
+            document.getElementById("eidAdhaCount").textContent = islamicEvents.eidAdhaCount;
+            document.getElementById("teamInitial").textContent = team[0];
+            document.getElementById("teamName").textContent = team;
+
+            // جلب البيانات من GitHub
+            const events = await fetchDataFromGitHub("https://raw.githubusercontent.com/yourusername/repo/main/events.json");
+            const teamData = await fetchDataFromGitHub("https://raw.githubusercontent.com/yourusername/repo/main/team_titles.json");
+            const teamStats = teamData.find(t => t.team === team) || { totalTitles: 0, titlesAfterBirth: 0 };
+
+            document.getElementById("totalTitles").textContent = teamStats.totalTitles || 0;
+            document.getElementById("titlesAfterBirth").textContent = teamStats.titlesAfterBirth || 0;
+
+            const eventsDiv = document.getElementById("events");
+            eventsDiv.innerHTML = `
+                <h4 class="text-lg font-bold mb-3">أحداث في يوم ${birthDateGreg.getDate()}/${birthDateGreg.getMonth() + 1}</h4>
+                <ul class="space-y-1">${events.map(event => `<li>${event}</li>`).join("")}</ul>
+            `;
+
+            setTimeout(() => {
+                document.getElementById("loadingState").classList.add("hidden");
+                document.getElementById("dashboard").classList.remove("hidden");
+            }, 800);
+        }
+
+        function initApp() {
+            document.getElementById("currentYear").textContent = new Date().getFullYear();
+            populateDateSelects();
+            initDarkMode();
+
+            document.getElementById("saveBtn").addEventListener("click", () => {
+                const name = document.getElementById("name").value;
+                const hijriDay = document.getElementById("hijriDay").value;
                 const hijriMonth = document.getElementById("hijriMonth").value;
-                const hijriYear = hijriYearSelect.value;
+                const hijriYear = document.getElementById("hijriYear").value;
+                const team = document.getElementById("team").value;
 
-                if (!hijriDay || !hijriMonth || !hijriYear) {
-                    alert("يرجى إدخال تاريخ الميلاد كاملًا");
+                if (!name || !hijriDay || !hijriMonth || !hijriYear || !team) {
+                    showError("يرجى ملء جميع الحقول");
                     return;
                 }
 
-                // تحويل التاريخ الهجري إلى ميلادي باستخدام معادلة تقريبية
-                const gregorianYear = parseInt(hijriYear) + 579;
-                const gregorianDate = new Date(gregorianYear, hijriMonth - 1, hijriDay);
-
-                // جلب الأحداث التاريخية من ويكيبيديا
-                const formattedDate = gregorianDate.toISOString().split("T")[0]; 
-                const wikiUrl = `https://ar.wikipedia.org/api/rest_v1/page/summary/${formattedDate}`;
-
-                try {
-                    const response = await fetch(wikiUrl);
-                    const data = await response.json();
-
-                    if (data.extract) {
-                        document.getElementById("historicalEvents").innerHTML = 
-                            `<li>${data.extract}</li>`;
-                    } else {
-                        document.getElementById("historicalEvents").innerHTML = "<li>لم يتم العثور على أحداث</li>";
-                    }
-
-                    document.getElementById("formContainer").classList.add("hidden");
-                    document.getElementById("infoContainer").classList.remove("hidden");
-                } catch (error) {
-                    console.error("خطأ في جلب البيانات:", error);
-                    document.getElementById("historicalEvents").innerHTML = "<li>حدث خطأ أثناء جلب البيانات</li>";
-                }
+                userData = { name, hijriDate: `${hijriDay}-${hijriMonth}-${hijriYear}`, team };
+                displayUserInfo();
             });
 
-            document.getElementById("savePdfBtn").addEventListener("click", function () {
+            document.getElementById("resetBtn").addEventListener("click", () => {
+                userData = null;
+                document.getElementById("name").value = "";
+                document.getElementById("hijriDay").value = "";
+                document.getElementById("hijriMonth").value = "";
+                document.getElementById("hijriYear").value = "";
+                document.getElementById("team").value = "";
+                document.getElementById("formContainer").classList.remove("hidden");
+                document.getElementById("infoContainer").classList.add("hidden");
+            });
+
+            document.getElementById("darkModeBtn").addEventListener("click", () => {
+                document.documentElement.classList.toggle("dark");
+            });
+
+            document.getElementById("savePdfBtn").addEventListener("click", () => {
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF();
-
-                doc.text("لوحة معلوماتك الشخصية", 10, 10);
-                doc.text(document.getElementById("historicalEvents").textContent, 10, 20);
-                doc.save("لوحة_المعلومات.pdf");
+                html2canvas(document.getElementById("dashboard")).then(canvas => {
+                    const imgData = canvas.toDataURL('image/png');
+                    doc.addImage(imgData, 'PNG', 10, 10, 190, 0);
+                    doc.save("لوحة_المعلومات.pdf");
+                });
             });
-        });
-    </script>
+        }
 
+        function showError(message) {
+            const errorDiv = document.getElementById("errorMessage");
+            errorDiv.textContent = message;
+            errorDiv.classList.remove("hidden");
+            setTimeout(() => errorDiv.classList.add("hidden"), 3000);
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initApp);
+        } else {
+            initApp();
+        }
+    </script>
 </body>
 </html>
