@@ -10,22 +10,13 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap');
 
-        body {
-            font-family: 'Tajawal', sans-serif;
-            transition: all 0.3s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
+        body { font-family: 'Tajawal', sans-serif; transition: all 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .animate-fadeIn { animation: fadeIn 0.5s ease forwards; }
         .card-item { animation: fadeIn 0.5s ease forwards; opacity: 0; }
         .card-item:nth-child(1) { animation-delay: 0.1s; }
         .card-item:nth-child(2) { animation-delay: 0.2s; }
         .card-item:nth-child(3) { animation-delay: 0.3s; }
-
         @keyframes spinner { to { transform: rotate(360deg); } }
         .spinner:before {
             content: ''; box-sizing: border-box; position: absolute; top: 50%; left: 50%;
@@ -33,15 +24,11 @@
             border-radius: 50%; border: 3px solid #ccc; border-top-color: #5D5CDE;
             animation: spinner .6s linear infinite;
         }
-
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.05); border-radius: 10px; }
         ::-webkit-scrollbar-thumb { background: rgba(93, 92, 222, 0.5); border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: rgba(93, 92, 222, 0.7); }
-
-        .stat-card {
-            transition: all 0.3s ease; position: relative; overflow: hidden; z-index: 1;
-        }
+        .stat-card { transition: all 0.3s ease; position: relative; overflow: hidden; z-index: 1; }
         .stat-card::before {
             content: ''; position: absolute; top: -10px; right: -10px;
             width: 40px; height: 40px; border-radius: 50%; background-color: rgba(93, 92, 222, 0.2); z-index: -1;
@@ -66,7 +53,6 @@
                 <input type="text" id="name" placeholder="أدخل اسمك الكامل" 
                     class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-primary focus:border-primary" required>
             </div>
-            
             <div>
                 <label for="hijriDate" class="block mb-2 font-medium text-lg">تاريخ ميلادك الهجري</label>
                 <div class="flex flex-wrap md:flex-nowrap gap-2">
@@ -93,11 +79,9 @@
                     </select>
                 </div>
             </div>
-            
             <div>
                 <label for="team" class="block mb-2 font-medium text-lg">فريقك السعودي المفضل</label>
-                <select id="team" 
-                    class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-primary focus:border-primary" required>
+                <select id="team" class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-primary focus:border-primary" required>
                     <option value="">اختر فريقك المفضل</option>
                     <option value="الهلال">الهلال</option>
                     <option value="النصر">النصر</option>
@@ -105,9 +89,7 @@
                     <option value="الأهلي">الأهلي</option>
                 </select>
             </div>
-            
-            <button id="saveBtn" 
-                class="w-full bg-gradient-to-l from-primary to-secondary hover:opacity-90 text-white font-medium py-3 px-4 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-1">
+            <button id="saveBtn" class="w-full bg-gradient-to-l from-primary to-secondary hover:opacity-90 text-white font-medium py-3 px-4 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-1">
                 إنشاء لوحة المعلومات
             </button>
         </div>
@@ -116,7 +98,6 @@
             <div id="loadingState" class="relative h-40">
                 <div class="spinner"></div>
             </div>
-            
             <div id="dashboard" class="hidden">
                 <div id="userHeader" class="flex flex-col md:flex-row items-center justify-between mb-8 bg-gray-50 dark:bg-gray-700 rounded-xl p-6 shadow-sm">
                     <div class="flex items-center mb-4 md:mb-0">
@@ -135,7 +116,6 @@
                         <p id="teamName" class="font-bold"></p>
                     </div>
                 </div>
-                
                 <h3 class="text-xl font-bold mb-4 flex items-center">
                     <span class="w-7 h-7 rounded-full bg-primary flex items-center justify-center text-white text-sm ml-2">1</span>
                     إحصائيات عمرك
@@ -157,9 +137,11 @@
                             <span id="hijriAge" class="text-3xl font-bold"></span>
                             <span class="text-gray-600 dark:text-gray-400 mr-1 mb-1">سنة</span>
                         </div>
+                        <div class="text-sm text-gray-600 dark:text-gray-400">
+                            <span id="hijriMonths"></span> شهر و <span id="hijriDays"></span> يوم
+                        </div>
                     </div>
                 </div>
-                
                 <h3 class="text-xl font-bold mb-4 flex items-center">
                     <span class="w-7 h-7 rounded-full bg-primary flex items-center justify-center text-white text-sm ml-2">2</span>
                     المناسبات الإسلامية في حياتك
@@ -190,7 +172,6 @@
                         <p class="text-sm text-gray-600 dark:text-gray-400">(منذ سن التكليف)</p>
                     </div>
                 </div>
-                
                 <h3 class="text-xl font-bold mb-4 flex items-center">
                     <span class="w-7 h-7 rounded-full bg-primary flex items-center justify-center text-white text-sm ml-2">3</span>
                     بطولات فريقك المفضل
@@ -211,13 +192,11 @@
                         </div>
                     </div>
                 </div>
-                
                 <h3 class="text-xl font-bold mb-4 flex items-center">
                     <span class="w-7 h-7 rounded-full bg-primary flex items-center justify-center text-white text-sm ml-2">4</span>
                     أحداث تاريخية في يوم ميلادك
                 </h3>
                 <div id="events" class="card-item bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 p-4 rounded-xl shadow-sm mb-6"></div>
-                
                 <div class="flex flex-wrap justify-center gap-3 mt-6">
                     <button id="resetBtn" class="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-300 flex items-center">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-1" viewBox="0 0 20 20" fill="currentColor">
@@ -238,31 +217,18 @@
                         حفظ كملف PDF
                     </button>
                 </div>
-                <div id="pdfSaveInstructions" class="hidden mt-4 p-4 bg-blue-50 dark:bg-blue-900 text-blue-800 dark:text-blue-100 rounded-lg">
-                    <div class="flex items-start">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 ml-2 mt-1 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <div>
-                            <p class="font-medium">لحفظ اللوحة كملف PDF:</p>
-                            <ol class="list-decimal list-inside mt-2 text-sm space-y-1">
-                                <li>انقر على زر "حفظ كملف PDF"</li>
-                                <li>اختر مكان الحفظ واسم الملف</li>
-                            </ol>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
 
         <footer class="mt-8 pt-4 border-t border-gray-200 dark:border-gray-700 text-center text-gray-500 dark:text-gray-400 text-sm">
-            <p>جميع الحقوق محفوظة &copy; <span id="currentYear"></span></p>
+            <p>جميع الحقوق محفوظة © <span id="currentYear"></span></p>
             <p class="mt-1">تم التطوير بواسطة <span class="font-bold text-primary">علي عبدالله بكري</span></p>
         </footer>
     </div>
 
     <script>
         let userData = null;
+        const currentDate = new Date('2025-03-11'); // التاريخ الحالي: 11 مارس 2025
 
         function initDarkMode() {
             if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
@@ -284,9 +250,7 @@
                 hijriDaySelect.appendChild(option);
             }
 
-            const today = new Date();
-            const currentYear = today.getFullYear();
-            const currentHijriYear = Math.floor((currentYear - 622) * (33 / 32));
+            const currentHijriYear = Math.floor((currentDate.getFullYear() - 622) * (33 / 32));
             const startHijriYear = currentHijriYear - 80;
 
             for (let i = currentHijriYear; i >= startHijriYear; i--) {
@@ -297,51 +261,98 @@
             }
         }
 
+        // تحويل التاريخ الهجري إلى ميلادي (تقريب محسّن)
         function hijriToGregorian(hijriYear, hijriMonth, hijriDay) {
-            // تقريب بسيط للتحويل (يمكن تحسينه باستخدام مكتبة مثل hijri-converter)
-            const gregYear = Math.floor(hijriYear + (hijriYear * 0.03));
-            const gregMonth = hijriMonth - 1;
-            const gregDay = hijriDay;
-            return new Date(gregYear, gregMonth, gregDay);
+            const jd = Math.floor((11 * hijriYear + 3) / 30) + 354 * hijriYear + 30 * hijriMonth - Math.floor((hijriMonth - 1) / 2) + hijriDay + 1948440 - 385;
+            const date = new Date((jd - 2440588) * 86400000);
+            return date;
         }
 
-        function calculateHijriAge(birthHijriDate, todayHijriDate) {
-            const years = todayHijriDate.year - birthHijriDate.year;
-            const months = todayHijriDate.month - birthHijriDate.month;
-            const days = todayHijriDate.day - birthHijriDate.day;
-
-            let totalMonths = years * 12 + months;
-            if (days < 0) totalMonths -= 1;
-            return {
-                years: Math.floor(totalMonths / 12),
-                months: totalMonths % 12,
-                days: days < 0 ? 30 + days : days
-            };
+        // حساب العمر بالميلادي
+        function calculateGregorianAge(birthDateGreg) {
+            const diffMs = currentDate - birthDateGreg;
+            const ageDate = new Date(diffMs);
+            const years = Math.abs(ageDate.getUTCFullYear() - 1970);
+            const months = ageDate.getUTCMonth();
+            const days = ageDate.getUTCDate() - 1;
+            return { years, months, days };
         }
 
-        function countIslamicEvents(birthHijriDate, todayHijriDate) {
+        // حساب العمر بالهجري
+        function calculateHijriAge(birthHijriYear, birthHijriMonth, birthHijriDay) {
+            const currentHijriYear = Math.floor((currentDate.getFullYear() - 622) * (33 / 32));
+            const currentHijriMonth = Math.floor((currentDate.getMonth() + 1) * (12 / 12));
+            const currentHijriDay = currentDate.getDate();
+
+            let years = currentHijriYear - birthHijriYear;
+            let months = currentHijriMonth - birthHijriMonth;
+            let days = currentHijriDay - birthHijriDay;
+
+            if (days < 0) {
+                months--;
+                days += 30;
+            }
+            if (months < 0) {
+                years--;
+                months += 12;
+            }
+            return { years, months, days };
+        }
+
+        // حساب المناسبات الإسلامية
+        function countIslamicEvents(birthHijriYear, birthHijriMonth) {
+            const currentHijriYear = Math.floor((currentDate.getFullYear() - 622) * (33 / 32));
+            const takleefYear = birthHijriYear + 10; // سن التكليف: 10 سنوات هجرية
             let ramadanCount = 0, eidFitrCount = 0, eidAdhaCount = 0;
-            const totalMonths = (todayHijriDate.year - birthHijriDate.year) * 12 + (todayHijriDate.month - birthHijriDate.month);
-            const takleefAge = 10 * 12; // 10 سنوات هجرية = 120 شهرًا
 
-            for (let month = 0; month <= totalMonths; month++) {
-                const currentYear = Math.floor((birthHijriDate.year * 12 + birthHijriDate.month + month) / 12);
-                const currentMonth = (birthHijriDate.month + month - 1) % 12 + 1;
-                if (currentMonth === 9 && month >= takleefAge) ramadanCount++; // رمضان (الشهر 9)
-                if (currentMonth === 10 && month >= takleefAge) eidFitrCount++; // عيد الفطر (الشهر 10)
-                if (currentMonth === 12 && month >= takleefAge) eidAdhaCount++; // عيد الأضحى (الشهر 12)
+            for (let year = birthHijriYear; year <= currentHijriYear; year++) {
+                if (year >= takleefYear) {
+                    if (year > birthHijriYear || birthHijriMonth <= 9) ramadanCount++; // رمضان (الشهر 9)
+                    if (year > birthHijriYear || birthHijriMonth <= 10) eidFitrCount++; // عيد الفطر (الشهر 10)
+                    if (year > birthHijriYear || birthHijriMonth <= 12) eidAdhaCount++; // عيد الأضحى (الشهر 12)
+                }
             }
             return { ramadanCount, eidFitrCount, eidAdhaCount };
         }
 
-        async function fetchDataFromGitHub(url) {
+        // جلب بيانات الفرق من ويكيبيديا باستخدام allorigins
+        async function fetchTeamData(team) {
+            const teamUrls = {
+                "الهلال": "https://ar.wikipedia.org/wiki/%D9%86%D8%A7%D8%AF%D9%8A_%D8%A7%D9%84%D9%87%D9%84%D8%A7%D9%84_%D8%A7%D9%84%D8%B3%D8%B9%D9%88%D8%AF%D9%8A",
+                "النصر": "https://ar.wikipedia.org/wiki/%D9%86%D8%A7%D8%AF%D9%8A_%D8%A7%D9%84%D9%86%D8%B5%D8%B1_%D8%A7%D9%84%D8%B3%D8%B9%D9%88%D8%AF%D9%8A",
+                "الاتحاد": "https://ar.wikipedia.org/wiki/%D9%86%D8%A7%D8%AF%D9%8A_%D8%A7%D9%84%D8%A7%D8%AA%D8%AD%D8%A7%D8%AF_%D8%A7%D9%84%D8%B3%D8%B9%D9%88%D8%AF%D9%8A",
+                "الأهلي": "https://ar.wikipedia.org/wiki/%D9%86%D8%A7%D8%AF%D9%8A_%D8%A7%D9%84%D8%A3%D9%87%D9%84%D9%8A_%D8%A7%D9%84%D8%B3%D8%B9%D9%88%D8%AF%D9%8A"
+            };
+            const url = `https://api.allorigins.win/raw?url=${encodeURIComponent(teamUrls[team])}`;
             try {
                 const response = await fetch(url);
-                if (!response.ok) throw new Error("Failed to fetch data");
-                return await response.json();
+                const html = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, "text/html");
+                const titlesText = doc.querySelector(".infobox")?.innerText || "غير متوفر";
+                const totalTitlesMatch = titlesText.match(/البطولات.*?(\d+)/i);
+                const totalTitles = totalTitlesMatch ? parseInt(totalTitlesMatch[1]) : 0;
+                return { totalTitles, titlesAfterBirth: Math.floor(totalTitles * 0.3) }; // تقدير تقريبي للبطولات بعد الميلاد
             } catch (error) {
-                console.error("Error fetching data:", error);
-                return [];
+                console.error("Error fetching team data:", error);
+                return { totalTitles: 0, titlesAfterBirth: 0 };
+            }
+        }
+
+        // جلب الأحداث التاريخية من ويكيبيديا
+        async function fetchHistoricalEvents(day, month) {
+            const url = `https://api.allorigins.win/raw?url=${encodeURIComponent(`https://ar.wikipedia.org/wiki/${month}_${day}`)}`;
+            try {
+                const response = await fetch(url);
+                const html = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, "text/html");
+                const eventsList = doc.querySelectorAll("#mw-content-text ul li");
+                const events = Array.from(eventsList).slice(0, 5).map(li => li.textContent.trim());
+                return events.length > 0 ? events : ["لا توجد أحداث متاحة لهذا اليوم"];
+            } catch (error) {
+                console.error("Error fetching events:", error);
+                return ["حدث خطأ أثناء جلب الأحداث"];
             }
         }
 
@@ -356,46 +367,31 @@
             const { name, hijriDate, team } = userData;
             const [hijriDay, hijriMonth, hijriYear] = hijriDate.split('-').map(Number);
             const birthDateGreg = hijriToGregorian(hijriYear, hijriMonth, hijriDay);
-            const today = new Date();
-            const ageInMilliseconds = today - birthDateGreg;
-            const ageInDays = Math.floor(ageInMilliseconds / (1000 * 60 * 60 * 24));
-            const ageInYears = Math.floor(ageInDays / 365);
-            const ageInMonths = Math.floor((ageInDays % 365) / 30);
-            const remainingDays = ageInDays % 30;
+            const gregorianAge = calculateGregorianAge(birthDateGreg);
+            const hijriAge = calculateHijriAge(hijriYear, hijriMonth, hijriDay);
+            const islamicEvents = countIslamicEvents(hijriYear, hijriMonth);
 
-            // تقدير التاريخ الهجري الحالي (تقريبي)
-            const currentHijriYear = Math.floor((today.getFullYear() - 622) * (33 / 32));
-            const currentHijriMonth = Math.floor((today.getMonth() + 1) * (12 / 12));
-            const currentHijriDay = today.getDate();
-            const todayHijriDate = { year: currentHijriYear, month: currentHijriMonth, day: currentHijriDay };
-            const birthHijriDate = { year: hijriYear, month: hijriMonth, day: hijriDay };
-            const hijriAge = calculateHijriAge(birthHijriDate, todayHijriDate);
-            const islamicEvents = countIslamicEvents(birthHijriDate, todayHijriDate);
-
-            // تحديث البيانات
             document.getElementById("userInitials").textContent = name.split(' ').map(n => n[0]).join('').substring(0, 2);
             document.getElementById("userName").textContent = name;
             document.getElementById("userBirthDate").textContent = `تاريخ الميلاد الهجري: ${hijriDay}/${hijriMonth}/${hijriYear}`;
-            document.getElementById("gregorianAge").textContent = ageInYears;
-            document.getElementById("gregorianMonths").textContent = ageInMonths;
-            document.getElementById("gregorianDays").textContent = remainingDays;
+            document.getElementById("gregorianAge").textContent = gregorianAge.years;
+            document.getElementById("gregorianMonths").textContent = gregorianAge.months;
+            document.getElementById("gregorianDays").textContent = gregorianAge.days;
             document.getElementById("hijriAge").textContent = hijriAge.years;
+            document.getElementById("hijriMonths").textContent = hijriAge.months;
+            document.getElementById("hijriDays").textContent = hijriAge.days;
             document.getElementById("ramadanCount").textContent = islamicEvents.ramadanCount;
             document.getElementById("eidFitrCount").textContent = islamicEvents.eidFitrCount;
             document.getElementById("eidAdhaCount").textContent = islamicEvents.eidAdhaCount;
             document.getElementById("teamInitial").textContent = team[0];
             document.getElementById("teamName").textContent = team;
 
-            // جلب البيانات من GitHub
-            const events = await fetchDataFromGitHub("https://raw.githubusercontent.com/yourusername/repo/main/events.json");
-            const teamData = await fetchDataFromGitHub("https://raw.githubusercontent.com/yourusername/repo/main/team_titles.json");
-            const teamStats = teamData.find(t => t.team === team) || { totalTitles: 0, titlesAfterBirth: 0 };
+            const teamData = await fetchTeamData(team);
+            document.getElementById("totalTitles").textContent = teamData.totalTitles;
+            document.getElementById("titlesAfterBirth").textContent = teamData.titlesAfterBirth;
 
-            document.getElementById("totalTitles").textContent = teamStats.totalTitles || 0;
-            document.getElementById("titlesAfterBirth").textContent = teamStats.titlesAfterBirth || 0;
-
-            const eventsDiv = document.getElementById("events");
-            eventsDiv.innerHTML = `
+            const events = await fetchHistoricalEvents(birthDateGreg.getDate(), birthDateGreg.getMonth() + 1);
+            document.getElementById("events").innerHTML = `
                 <h4 class="text-lg font-bold mb-3">أحداث في يوم ${birthDateGreg.getDate()}/${birthDateGreg.getMonth() + 1}</h4>
                 <ul class="space-y-1">${events.map(event => `<li>${event}</li>`).join("")}</ul>
             `;
@@ -407,7 +403,7 @@
         }
 
         function initApp() {
-            document.getElementById("currentYear").textContent = new Date().getFullYear();
+            document.getElementById("currentYear").textContent = currentDate.getFullYear();
             populateDateSelects();
             initDarkMode();
 
