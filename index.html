@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>لوحة معلوماتك الشخصية</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -72,7 +73,7 @@
             margin-left: -15px;
             border-radius: 50%;
             border: 3px solid #ccc;
-            border-top-color: #5D5CDE;
+            border-top-color: '#5D5CDE';
             animation: spinner .6s linear infinite;
         }
         
@@ -228,6 +229,9 @@
                             <span id="gregorianAge" class="text-3xl font-bold"></span>
                             <span class="text-gray-600 dark:text-gray-400 mr-1 mb-1">سنة</span>
                         </div>
+                        <div class="text-sm text-gray-600 dark:text-gray-400">
+                            <span id="gregorianMonths"></span> شهر و <span id="gregorianDays"></span> يوم
+                        </div>
                         <div id="ageProgressBar" class="mt-3 h-2 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
                             <div class="h-full bg-primary" style="width: 0%"></div>
                         </div>
@@ -239,6 +243,9 @@
                         <div class="flex items-end">
                             <span id="hijriAge" class="text-3xl font-bold"></span>
                             <span class="text-gray-600 dark:text-gray-400 mr-1 mb-1">سنة</span>
+                        </div>
+                        <div class="text-sm text-gray-600 dark:text-gray-400">
+                            <span id="hijriMonths"></span> شهر و <span id="hijriDays"></span> يوم
                         </div>
                         <div class="mt-2 flex justify-between text-sm">
                             <span class="text-gray-600 dark:text-gray-400">العمر الهجري أكبر بحوالي:</span>
@@ -264,6 +271,7 @@
                             <span class="text-gray-600 dark:text-gray-400">عدد أيام الصيام:</span>
                             <span id="fastingDays" class="font-bold"></span>
                         </div>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">(منذ سن التكليف)</p>
                     </div>
                     
                     <div class="stat-card card-item bg-gradient-to-br from-emerald-50 to-green-50 dark:from-gray-700 dark:to-gray-800 p-4 rounded-xl shadow-sm">
@@ -272,6 +280,7 @@
                             <span id="eidFitrCount" class="text-3xl font-bold"></span>
                             <span class="text-gray-600 dark:text-gray-400 mr-1 mb-1">عيد</span>
                         </div>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">(منذ سن التكليف)</p>
                         <div class="mt-3 h-2 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
                             <div id="eidFitrProgress" class="h-full bg-emerald-500" style="width: 0%"></div>
                         </div>
@@ -283,6 +292,7 @@
                             <span id="eidAdhaCount" class="text-3xl font-bold"></span>
                             <span class="text-gray-600 dark:text-gray-400 mr-1 mb-1">عيد</span>
                         </div>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">(منذ سن التكليف)</p>
                         <div class="mt-3 h-2 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
                             <div id="eidAdhaProgress" class="h-full bg-red-500" style="width: 0%"></div>
                         </div>
@@ -363,25 +373,24 @@
                         </svg>
                         تغيير الوضع
                     </button>
-                    <button id="saveImageBtn" 
+                    <button id="savePdfBtn" 
                         class="bg-primary hover:bg-opacity-90 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-300 flex items-center">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-1" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd" d="M4 5a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V7a2 2 0 00-2-2h-1.586a1 1 0 01-.707-.293l-1.121-1.121A2 2 0 0011.172 3H8.828a2 2 0 00-1.414.586L6.293 4.707A1 1 0 015.586 5H4zm6 9a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" />
                         </svg>
-                        حفظ كصورة
+                        حفظ كملف PDF
                     </button>
                 </div>
                 
-                <div id="imageSaveInstructions" class="hidden mt-4 p-4 bg-blue-50 dark:bg-blue-900 text-blue-800 dark:text-blue-100 rounded-lg">
+                <div id="pdfSaveInstructions" class="hidden mt-4 p-4 bg-blue-50 dark:bg-blue-900 text-blue-800 dark:text-blue-100 rounded-lg">
                     <div class="flex items-start">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 ml-2 mt-1 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         <div>
-                            <p class="font-medium">لحفظ اللوحة كصورة:</p>
+                            <p class="font-medium">لحفظ اللوحة كملف PDF:</p>
                             <ol class="list-decimal list-inside mt-2 text-sm space-y-1">
-                                <li>انقر بالزر الأيمن على اللوحة</li>
-                                <li>اختر "حفظ الصورة باسم" أو "التقاط لقطة شاشة"</li>
+                                <li>انقر على زر "حفظ كملف PDF"</li>
                                 <li>اختر مكان الحفظ واسم الملف</li>
                             </ol>
                         </div>
@@ -1061,9 +1070,20 @@
                 document.documentElement.classList.toggle("dark");
             });
             
-            document.getElementById("saveImageBtn").addEventListener("click", () => {
-                const instructionsEl = document.getElementById("imageSaveInstructions");
-                instructionsEl.classList.toggle("hidden");
+            document.getElementById("savePdfBtn").addEventListener("click", () => {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                
+                // إضافة محتوى اللوحة إلى ملف PDF
+                doc.html(document.getElementById("dashboard"), {
+                    callback: function (doc) {
+                        doc.save("لوحة_المعلومات.pdf");
+                    },
+                    x: 10,
+                    y: 10,
+                    width: 190, // العرض المناسب لملف PDF
+                    windowWidth: document.getElementById("dashboard").scrollWidth
+                });
             });
         }
         
