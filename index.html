@@ -228,7 +228,7 @@
 
     <script>
         let userData = null;
-        const currentDate = new Date('2025-03-11'); // التاريخ الحالي: 11 مارس 2025
+        const currentDate = new Date('2025-03-11');
 
         function initDarkMode() {
             if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
@@ -261,14 +261,12 @@
             }
         }
 
-        // تحويل التاريخ الهجري إلى ميلادي
         function hijriToGregorian(hijriYear, hijriMonth, hijriDay) {
             const jd = Math.floor((11 * hijriYear + 3) / 30) + 354 * hijriYear + 30 * hijriMonth - Math.floor((hijriMonth - 1) / 2) + hijriDay + 1948440 - 385;
             const date = new Date((jd - 2440588) * 86400000);
             return date;
         }
 
-        // حساب العمر بالميلادي
         function calculateGregorianAge(birthDateGreg) {
             const diffMs = currentDate - birthDateGreg;
             const ageDate = new Date(diffMs);
@@ -278,7 +276,6 @@
             return { years, months, days };
         }
 
-        // حساب العمر بالهجري
         function calculateHijriAge(birthHijriYear, birthHijriMonth, birthHijriDay) {
             const currentHijriYear = Math.floor((currentDate.getFullYear() - 622) * (33 / 32));
             const currentHijriMonth = Math.floor((currentDate.getMonth() + 1) * (12 / 12));
@@ -299,10 +296,9 @@
             return { years, months, days };
         }
 
-        // حساب المناسبات الإسلامية
         function countIslamicEvents(birthHijriYear, birthHijriMonth) {
             const currentHijriYear = Math.floor((currentDate.getFullYear() - 622) * (33 / 32));
-            const takleefYear = birthHijriYear + 10; // سن التكليف: 10 سنوات هجرية
+            const takleefYear = birthHijriYear + 10;
             let ramadanCount = 0, eidFitrCount = 0, eidAdhaCount = 0;
 
             for (let year = birthHijriYear; year <= currentHijriYear; year++) {
@@ -315,7 +311,6 @@
             return { ramadanCount, eidFitrCount, eidAdhaCount };
         }
 
-        // جلب بيانات الفرق وتحليل البطولات
         async function fetchTeamData(team, birthDateGreg) {
             const teamUrls = {
                 "الهلال": "https://ar.wikipedia.org/wiki/%D9%82%D8%A7%D8%A6%D9%85%D8%A9_%D8%A8%D8%B7%D9%88%D9%84%D8%A7%D8%AA_%D9%86%D8%A7%D8%AF%D9%8A_%D8%A7%D9%84%D9%87%D9%84%D8%A7%D9%84_%D8%A7%D9%84%D8%B3%D8%B9%D9%88%D8%AF%D9%8A",
@@ -329,30 +324,24 @@
                 const html = await response.text();
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(html, "text/html");
-                const titleElements = doc.querySelectorAll("table.wikitable td");
-                let totalTitles = 0;
-                let titlesAfterBirth = 0;
-
-                titleElements.forEach(element => {
-                    const text = element.textContent.trim();
+                const years = [];
+                
+                const tableCells = doc.querySelectorAll("table.wikitable td");
+                tableCells.forEach(cell => {
+                    const text = cell.textContent.trim();
                     const yearMatch = text.match(/\d{4}/);
-                    if (yearMatch) {
-                        const year = parseInt(yearMatch[0]);
-                        totalTitles++;
-                        if (year >= birthDateGreg.getFullYear()) {
-                            titlesAfterBirth++;
-                        }
-                    }
+                    if (yearMatch) years.push(parseInt(yearMatch[0]));
                 });
 
+                const totalTitles = years.length;
+                const titlesAfterBirth = years.filter(year => year >= birthDateGreg.getFullYear()).length;
                 return { totalTitles: totalTitles || 0, titlesAfterBirth: titlesAfterBirth || 0 };
             } catch (error) {
-                console.error("Error fetching team data:", error);
+                console.error(`خطأ في جلب بيانات فريق ${team}:`, error);
                 return { totalTitles: 0, titlesAfterBirth: 0 };
             }
         }
 
-        // جلب أهم 3 أحداث تاريخية
         async function fetchHistoricalEvents(day, month) {
             const url = `https://api.allorigins.win/raw?url=${encodeURIComponent(`https://ar.wikipedia.org/wiki/${month}_${day}`)}`;
             try {
@@ -360,11 +349,16 @@
                 const html = await response.text();
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(html, "text/html");
-                const eventsList = doc.querySelectorAll("#mw-content-text ul li");
-                const events = Array.from(eventsList).slice(0, 3).map(li => li.textContent.trim());
+                const events = [];
+                
+                const listItems = doc.querySelectorAll("#mw-content-text ul li");
+                listItems.forEach((item, i) => {
+                    if (i < 3) events.push(item.textContent.trim());
+                });
+
                 return events.length > 0 ? events : ["لا توجد أحداث متاحة لهذا اليوم"];
             } catch (error) {
-                console.error("Error fetching events:", error);
+                console.error("خطأ في جلب الأحداث:", error);
                 return ["حدث خطأ أثناء جلب الأحداث"];
             }
         }
@@ -459,7 +453,7 @@
                 const height = doc.internal.pageSize.getHeight();
 
                 html2canvas(dashboard, {
-                    scale: 2, // تحسين الجودة
+                    scale: 2,
                     width: dashboard.scrollWidth,
                     height: dashboard.scrollHeight,
                     windowWidth: document.body.scrollWidth,
