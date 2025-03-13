@@ -107,6 +107,12 @@
                 transform: none;
                 box-shadow: none;
             }
+            /* تحسين عرض الشعارات عند الطباعة */
+            .team-logo {
+                width: 50px !important; /* الحجم الثابت عند الطباعة */
+                height: 50px !important;
+                object-fit: contain;
+            }
         }
         
         /* Life info circle */
@@ -133,6 +139,8 @@
             max-height: 100%;
             border-radius: 50%;
             object-fit: contain;
+            width: 56px; /* الحجم الثابت على الشاشة */
+            height: 56px; /* الحجم الثابت على الشاشة */
         }
     </style>
 </head>
@@ -414,12 +422,12 @@
         let userData = null;
         const currentDate = new Date('2025-03-11');
 
-        // روابط صور شعارات الأندية
+        // روابط صور شعارات الأندية (تم تحديثها حسب الطلب)
         const teamLogos = {
-            "الهلال": "https://upload.wikimedia.org/wikipedia/en/thumb/c/c4/AlHilal_Logo.svg/1200px-AlHilal_Logo.svg.png",
-            "النصر": "https://upload.wikimedia.org/wikipedia/en/thumb/a/aa/Al-Nassr_FC.svg/1200px-Al-Nassr_FC.svg.png",
-            "الاتحاد": "https://upload.wikimedia.org/wikipedia/en/3/3f/Ittihad_FC.png",
-            "الأهلي": "https://upload.wikimedia.org/wikipedia/en/thumb/e/eb/Al-Ahli_Saudi_FC_logo.svg/800px-Al-Ahli_Saudi_FC_logo.svg.png"
+            "الهلال": "https://salogos.org/wp-content/uploads/2023/03/%D9%86%D8%A7%D8%AF%D9%8A-%D8%A7%D9%84%D9%87%D9%84%D8%A7%D9%84-1224x1536.png",
+            "النصر": "https://upload.wikimedia.org/wikipedia/ar/6/60/Alnassr_FC_Logo_2020.PNG",
+            "الاتحاد": "https://upload.wikimedia.org/wikipedia/ar/e/e1/Ittihad_logo.svg",
+            "الأهلي": "https://upload.wikimedia.org/wikipedia/ar/b/b2/Al-Ahli_Logo.svg"
         };
 
         // لون كل نادي للاستخدام في بعض الإحصائيات
@@ -885,9 +893,18 @@
                     if (imgHeight <= (pageHeight - 2 * margin)) {
                         doc.addImage(imgData, 'JPEG', margin, margin, imgWidth, imgHeight);
                     } else {
-                        // If content is taller than one page, fit it to page height
-                        const scaledWidth = imgWidth * ((pageHeight - 2 * margin) / imgHeight);
-                        doc.addImage(imgData, 'JPEG', margin + (imgWidth - scaledWidth) / 2, margin, scaledWidth, pageHeight - 2 * margin);
+                        // Handle multi-page content
+                        let position = margin;
+                        const pageHeightAdjusted = pageHeight - 2 * margin;
+                        const totalPages = Math.ceil(imgHeight / pageHeightAdjusted);
+
+                        for (let i = 0; i < totalPages; i++) {
+                            if (i > 0) doc.addPage();
+                            const heightOnPage = Math.min(imgHeight - (i * pageHeightAdjusted), pageHeightAdjusted);
+                            const scaledWidth = (imgWidth * heightOnPage) / imgHeight;
+                            doc.addImage(imgData, 'JPEG', margin + (imgWidth - scaledWidth) / 2, position, scaledWidth, heightOnPage);
+                            position += heightOnPage;
+                        }
                     }
                     
                     doc.save(`لوحة_معلومات_${name.split(' ')[0]}.pdf`);
